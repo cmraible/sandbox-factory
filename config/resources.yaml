@@ -1,0 +1,19 @@
+# Agent Sandbox - Resource Configuration
+
+# Default resources for all VMs
+defaults:
+  cpus: 4
+  memory: 8GiB
+  disk: 50GiB
+
+# Max concurrent VMs (soft limit - just for reference)
+max_concurrent_vms: 10
+
+# Per-repo overrides (optional)
+# Format: "owner/repo" with resource settings
+overrides: {}
+  # Example:
+  # large-org/monorepo:
+  #   cpus: 8
+  #   memory: 16GiB
+  #   disk: 100GiB

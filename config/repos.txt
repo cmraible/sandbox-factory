@@ -1,0 +1,8 @@
+# Agent Sandbox - Repository List
+# Add repos here (one per line, format: owner/repo)
+# Lines starting with # are comments
+
+# Example repos (replace with your own):
+# anthropics/claude-code
+# your-org/your-repo
+cli/cli
