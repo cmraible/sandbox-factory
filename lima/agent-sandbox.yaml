@@ -70,7 +70,6 @@ provision:
         wget \
         git \
         vim \
-        tmux \
         zsh \
         jq \
         unzip \
@@ -199,56 +198,6 @@ provision:
         echo '# Prompt'
         echo "PROMPT='%F{green}[agent]%f %F{blue}%~%f %# '"
       } > ~/.zshrc
-
-      # Write .tmux.conf
-      {
-        echo 'set -g mouse on'
-        echo 'set -g base-index 1'
-        echo 'set -s escape-time 0'
-        echo 'set-window-option -g mode-keys vi'
-        echo ''
-        echo '# Prefix: Ctrl+a'
-        echo 'unbind C-b'
-        echo 'set-option -g prefix C-a'
-        echo 'bind-key C-a send-prefix'
-        echo ''
-        echo '# Split panes'
-        echo 'bind | split-window -h'
-        echo 'bind - split-window -v'
-        echo ''
-        echo '# Status bar'
-        echo 'set -g status-left-length 40'
-        echo 'set -g status-left "[#S] "'
-      } > ~/.tmux.conf
-
-      # Write ready-tmux script
-      {
-        echo '#!/bin/bash'
-        echo '# Setup tmux windows for agent workflow'
-        echo ''
-        echo '# If not in tmux, start a new session and run setup'
-        echo 'if [ -z "$TMUX" ]; then'
-        echo '  tmux new-session -d -s agent -c ~/workspace/repo'
-        echo '  TMUX_STARTED=1'
-        echo 'fi'
-        echo ''
-        echo '# Setup windows'
-        echo 'tmux rename-window "vim"'
-        echo 'tmux send-keys "cd ~/workspace/repo && vim ." C-m'
-        echo 'tmux new-window -n "server" -c ~/workspace/repo'
-        echo 'tmux new-window -n "claude" -c ~/workspace/repo'
-        echo 'tmux send-keys "claude --dangerously-skip-permissions" C-m'
-        echo 'tmux new-window -n "git" -c ~/workspace/repo'
-        echo 'tmux send-keys "lazygit" C-m'
-        echo 'tmux new-window -n "scratch" -c ~/workspace/repo'
-        echo 'tmux select-window -t "claude"'
-        echo ''
-        echo '# If we started tmux, attach to it'
-        echo 'if [ -n "$TMUX_STARTED" ]; then'
-        echo '  exec tmux attach -t agent'
-        echo 'fi'
-      } > ~/.local/bin/ready-tmux
-      chmod +x ~/.local/bin/ready-tmux
 
       echo "User provisioning complete"
 

@@ -1,6 +1,6 @@
-# Agent Sandbox Spec
+# Sandbox Factory Spec
 
-A secure, isolated VM environment for running AI coding agents autonomously.
+A tool to create secure, isolated VM environments locally for running AI coding agents autonomously in YOLO mode.
 
 ## Goals
 
@@ -8,41 +8,32 @@ A secure, isolated VM environment for running AI coding agents autonomously.
 2. **Network control** - Granular allowlist of domains and ports
 3. **Disposability** - VMs are ephemeral; destruction loses nothing important
 4. **Safe autonomy** - Run `claude --dangerously-skip-permissions` without risk
-5. **Familiar workflow** - Integrate with existing tmux-sessionizer pattern
-6. **Multi-agent** - Support 1-10 concurrent agent VMs
+5. **Familiar workflow** - Personalize dotfiles, install vim, git, etc as desired
+6. **Multi-agent** - Support multiple concurrent agent VMs
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  macOS Host                                                         │
-│                                                                     │
-│  ┌─────────────────┐    ┌─────────────────┐                        │
-│  │ tmux session    │    │ tmux session    │                        │
-│  │ (repo-a)        │    │ (repo-b)        │                        │
-│  │                 │    │                 │                        │
-│  │  SSH ──────────────────────┐           │                        │
-│  └─────────────────┘    │     │           │                        │
-│                         │     │           │                        │
-│  ┌──────────────────────┼─────┼───────────┼──────────────────────┐ │
-│  │ Lima               ┌─┴─────┴─┐    ┌────┴────┐                 │ │
-│  │                    │  VM 1   │    │  VM 2   │                 │ │
-│  │                    │ repo-a  │    │ repo-b  │                 │ │
-│  │                    │         │    │         │                 │ │
-│  │                    │ ┌─────┐ │    │ ┌─────┐ │                 │ │
-│  │                    │ │tmux │ │    │ │tmux │ │                 │ │
-│  │                    │ │ vim │ │    │ │ vim │ │                 │ │
-│  │                    │ │claude│ │   │ │claude│ │                │ │
-│  │                    │ │ git │ │    │ │ git │ │                 │ │
-│  │                    │ └─────┘ │    │ └─────┘ │                 │ │
-│  │                    └────┬────┘    └────┬────┘                 │ │
-│  │                         │              │                      │ │
-│  │                    ┌────┴──────────────┴────┐                 │ │
-│  │                    │    NAT + Filtering     │                 │ │
-│  │                    └───────────┬────────────┘                 │ │
-│  └────────────────────────────────┼──────────────────────────────┘ │
-│                                   │                                 │
-└───────────────────────────────────┼─────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│  macOS Host                                                          │
+│                                                                      │
+│  ┌────────────────────────────────────────────────────────────────┐  │
+│  │ Lima                                                            │  │
+│  │                    ┌─────────┐    ┌─────────┐                   │  │
+│  │                    │  VM 1   │    │  VM 2   │                   │  │
+│  │                    │ repo-a  │    │ repo-b  │                   │  │
+│  │                    │         │    │         │                   │  │
+│  │                    │  vim    │    │  vim    │                   │  │
+│  │                    │  claude │    │  claude │                   │  │
+│  │                    │  git    │    │  git    │                   │  │
+│  │                    └────┬────┘    └────┬────┘                   │  │
+│  │                         │              │                        │  │
+│  │                    ┌────┴──────────────┴────┐                   │  │
+│  │                    │    NAT + Filtering     │                   │  │
+│  │                    └───────────┬────────────┘                   │  │
+│  └────────────────────────────────┼────────────────────────────────┘  │
+│                                   │                                   │
+└───────────────────────────────────┼───────────────────────────────────┘
                                     │
                           ┌─────────┴─────────┐
                           │    Internet       │
@@ -137,7 +128,7 @@ deb.nodesource.com
 
 ### 3. Agent Sessionizer Script
 
-**File:** `scripts/agent-sessionizer`
+**File:** `scripts/sandbox-factory`
 
 **Workflow:**
 ```
@@ -157,25 +148,23 @@ User triggers hotkey (Alt+Shift+P)
     ▼               │
 Create new VM       │
 Clone repo          │
-Setup tmux          │
     │               │
     ▼               ▼
-Switch to local tmux session
-(SSH into VM tmux)
+Connect to VM via SSH
 ```
 
 **Interface:**
 ```bash
 # Start new agent session
-agent-sessionizer                    # Interactive fzf selection
-agent-sessionizer owner/repo         # Direct repo specification
+sandbox-factory                    # Interactive fzf selection
+sandbox-factory owner/repo         # Direct repo specification
 
 # List running agent VMs
-agent-sessionizer --list
+sandbox-factory --list
 
 # Stop/destroy a VM
-agent-sessionizer --stop owner/repo
-agent-sessionizer --destroy owner/repo
+sandbox-factory --stop owner/repo
+sandbox-factory --destroy owner/repo
 ```
 
 ### 4. Base Image Provisioning
@@ -185,7 +174,7 @@ agent-sessionizer --destroy owner/repo
 **Installed tools:**
 - Docker
 - Node.js (via nvm)
-- Git, vim, tmux, zsh
+- Git, vim, zsh
 - lazygit
 - gh CLI
 - Claude Code
@@ -194,10 +183,8 @@ agent-sessionizer --destroy owner/repo
 
 **VM-specific dotfiles:**
 - `.zshrc` (simplified)
-- `.tmux.conf`
 - `.gitconfig` (without personal email - uses repo config)
 - `.claude/settings.json` (permissive for sandbox)
-- `ready-tmux` (modified for agent workflow)
 
 ### 5. Configuration Files
 
@@ -212,7 +199,7 @@ sandbox/
 ├── lima/
 │   └── agent-sandbox.yaml      # Lima VM template (includes provisioning)
 └── scripts/
-    └── agent-sessionizer       # Main CLI entry point
+    └── sandbox-factory       # Main CLI entry point
 ```
 
 ### 6. Secrets Management
@@ -239,8 +226,8 @@ limactl shell agent-foo -- bash -c "echo 'export GITHUB_TOKEN=${GITHUB_TOKEN}' >
 ### Creating a New Agent Session
 
 ```bash
-# 1. User triggers agent-sessionizer
-$ agent-sessionizer
+# 1. User triggers sandbox-factory
+$ sandbox-factory
 
 # 2. fzf shows repos from config/repos.txt
 > anthropics/claude-code
@@ -252,18 +239,15 @@ $ agent-sessionizer
 #    b. Start Lima VM from template
 #    c. Inject secrets
 #    d. Clone repo
-#    e. Run ready-tmux inside VM
-#    f. Create local tmux session that SSHs to VM
 
-# 4. User is now in tmux session connected to VM
-#    Windows: vim | server | claude | git | scratch
+# 4. User connects to VM via: limactl shell <vm-name>
 ```
 
 ### Switching Between Agent Sessions
 
 ```bash
 # Same hotkey (Alt+Shift+P) shows running VMs at top of fzf
-$ agent-sessionizer
+$ sandbox-factory
 
 > [RUNNING] anthropics/claude-code     # Switch to existing
   [RUNNING] your-org/some-repo         # Switch to existing
@@ -275,10 +259,7 @@ $ agent-sessionizer
 
 ```bash
 # Manual destruction
-$ agent-sessionizer --destroy anthropics/claude-code
-
-# Or from within tmux: detach and destroy
-# (keybinding TBD, e.g., prefix + D)
+$ sandbox-factory --destroy anthropics/claude-code
 ```
 
 ## Security Model
@@ -404,7 +385,7 @@ overrides:
 ### Phase 1: MVP ✅
 - [x] Lima VM config with isolation (`lima/agent-sandbox.yaml`)
 - [x] Basic provisioning script (node, docker, git, claude) - embedded in yaml
-- [x] Simple agent-sessionizer (create/list/destroy) (`scripts/agent-sessionizer`)
+- [x] Simple sandbox-factory (create/list/destroy) (`scripts/sandbox-factory`)
 - [x] Manual secret injection (GITHUB_TOKEN, 1Password optional)
 - [x] Basic network filtering (iptables ports only - 80, 443, 22)
 - [x] Config files (repos.txt, network-allowlist.txt, resources.yaml)
@@ -412,12 +393,11 @@ overrides:
 ### Phase 2: Polish
 - [ ] DNS-based domain filtering (use network-allowlist.txt)
 - [ ] Full dotfiles in VM
-- [x] tmux integration (host session → VM session) - basic version done
 - [ ] Config-driven resource limits (parse resources.yaml)
 - [x] Repo list in config file (config/repos.txt)
 
 ### Phase 3: Advanced
-- [ ] 1Password integration for secrets (partially done - optional in agent-sessionizer)
+- [ ] 1Password integration for secrets (partially done - optional in sandbox-factory)
 - [ ] Homelab support
 - [x] Multiple concurrent VMs (supported via unique VM names)
 - [ ] Monitoring/logging
@@ -443,8 +423,8 @@ echo "your-org/your-repo" >> config/repos.txt
 # 2. Set GitHub token (or configure 1Password)
 export GITHUB_TOKEN=your_scoped_pat
 
-# 3. Run agent-sessionizer
-./scripts/agent-sessionizer
+# 3. Run sandbox-factory
+./scripts/sandbox-factory
 ```
 
 ### Adding to PATH
@@ -456,7 +436,7 @@ export PATH="$HOME/Developer/sandbox/scripts:$PATH"
 
 Or create a symlink:
 ```bash
-ln -s ~/Developer/sandbox/scripts/agent-sessionizer ~/.local/bin/
+ln -s ~/Developer/sandbox/scripts/sandbox-factory ~/.local/bin/
 ```
 
 ---

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# agent-sessionizer - Create and manage sandboxed agent VMs
+# sandbox-factory - Create and manage sandboxed agent VMs
 #
 # Usage:
-#   agent-sessionizer              # Interactive fzf selection
-#   agent-sessionizer owner/repo   # Direct repo specification
-#   agent-sessionizer --list       # List running VMs
-#   agent-sessionizer --stop NAME  # Stop a VM
-#   agent-sessionizer --destroy NAME  # Destroy a VM
-#   agent-sessionizer --shell NAME # Shell into a VM
+#   sandbox-factory              # Interactive fzf selection
+#   sandbox-factory owner/repo   # Direct repo specification
+#   sandbox-factory --list       # List running VMs
+#   sandbox-factory --stop NAME  # Stop a VM
+#   sandbox-factory --destroy NAME  # Destroy a VM
+#   sandbox-factory --shell NAME # Shell into a VM
 
 set -e
 
@@ -259,7 +259,7 @@ main() {
             shell_vm "$2"
             ;;
         --help|-h)
-            echo "Usage: agent-sessionizer [OPTIONS] [REPO]"
+            echo "Usage: sandbox-factory [OPTIONS] [REPO]"
             echo ""
             echo "Options:"
             echo "  --list, -l          List all agent VMs"
@@ -269,11 +269,11 @@ main() {
             echo "  --help, -h          Show this help"
             echo ""
             echo "Examples:"
-            echo "  agent-sessionizer                    # Interactive selection"
-            echo "  agent-sessionizer owner/repo         # Create VM for specific repo"
-            echo "  agent-sessionizer --list             # List running VMs"
-            echo "  agent-sessionizer --shell agent-foo-abc123"
-            echo "  agent-sessionizer --destroy agent-foo-abc123"
+            echo "  sandbox-factory                    # Interactive selection"
+            echo "  sandbox-factory owner/repo         # Create VM for specific repo"
+            echo "  sandbox-factory --list             # List running VMs"
+            echo "  sandbox-factory --shell agent-foo-abc123"
+            echo "  sandbox-factory --destroy agent-foo-abc123"
             ;;
         "")
             interactive_select
