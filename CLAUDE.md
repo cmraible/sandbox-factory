@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Sandbox Factory creates secure, isolated Lima VMs on macOS for running AI coding agents (like Claude Code) with `--dangerously-skip-permissions`. VMs have no host filesystem access and restricted network (allowlisted domains only, ports 80/443/22/53).
+Sandbox Factory creates secure, isolated Lima VMs on macOS for running AI coding agents (like Claude Code) with `--dangerously-skip-permissions`. VMs have no host filesystem access and restricted network (outbound ports 80/443/22/53 only).
 
 ## Architecture
 
@@ -13,13 +13,13 @@ macOS Host
   └─ Lima (VM hypervisor)
       ├─ VM 1 (agent-owner-repo-suffix)
       │  └─ vim, claude, git, docker
-      └─ NAT + Network Filtering → Internet (allowlisted domains only)
+      └─ NAT + Network Filtering → Internet (port-filtered)
 ```
 
 **Key components:**
 - `scripts/sandbox-factory` - Main CLI (bash) for VM lifecycle management
 - `lima/agent-sandbox.yaml` - Lima VM template with inline provisioning scripts
-- `config/` - repos.txt, network-allowlist.txt, resources.yaml
+- `config/repos.txt` - List of repos for fzf selection
 
 ## Commands
 
@@ -46,11 +46,5 @@ sandbox-factory --destroy <vm-name> # Destroy VM (irreversible)
 - GitHub token injected into VMs via `~/.zshenv`
 - VMs run Ubuntu 24.04 with Docker, Node.js (nvm), Claude Code, Playwright pre-installed
 - No host filesystem mounts (critical for isolation)
-
-## Project Status
-
-- **Phase 1 (MVP):** Complete - VM creation, iptables port filtering
-- **Phase 2:** In progress - DNS-based domain filtering not yet implemented
-- **Phase 3:** Future - 1Password integration, homelab support
 
 See `SPEC.md` for full architecture specification.

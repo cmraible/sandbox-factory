@@ -81,50 +81,16 @@ provision:
 
 ### 2. Network Filtering
 
-**Approach:** DNS-based filtering + iptables port restrictions
+**Approach:** iptables port restrictions
 
-**Allowed Domains** (configurable in `config/network-allowlist.txt`):
-```
-# GitHub
-github.com
-api.github.com
-raw.githubusercontent.com
-objects.githubusercontent.com
-
-# npm
-registry.npmjs.org
-
-# Docker Hub
-hub.docker.com
-registry-1.docker.io
-auth.docker.io
-production.cloudflare.docker.com
-
-# Anthropic
-api.anthropic.com
-claude.ai
-
-# Ubuntu packages
-archive.ubuntu.com
-security.ubuntu.com
-
-# Node.js
-nodejs.org
-deb.nodesource.com
-```
+**Allowed:**
+- Outbound ports 80 (HTTP), 443 (HTTPS), 22 (SSH), 53 (DNS)
 
 **Blocked:**
-- All other domains (DNS returns NXDOMAIN)
-- All ports except 80, 443, 22 outbound
+- All other outbound ports
 - All inbound connections
 
-**Implementation:**
-1. Run `dnsmasq` inside VM as DNS server
-2. Configure dnsmasq to only resolve allowlisted domains
-3. Use iptables to:
-   - Force all DNS through local dnsmasq
-   - Block outbound except 80/443/22
-   - Block all inbound
+**Implementation:** iptables rules in `/etc/rc.local` inside VM
 
 ### 3. Agent Sessionizer Script
 
@@ -193,13 +159,11 @@ sandbox-factory --destroy owner/repo
 sandbox/
 ├── SPEC.md                     # This file
 ├── config/
-│   ├── repos.txt               # List of repos for fzf
-│   ├── network-allowlist.txt   # Allowed domains (for Phase 2)
-│   └── resources.yaml          # CPU/memory/disk defaults
+│   └── repos.txt               # List of repos for fzf
 ├── lima/
 │   └── agent-sandbox.yaml      # Lima VM template (includes provisioning)
 └── scripts/
-    └── sandbox-factory       # Main CLI entry point
+    └── sandbox-factory         # Main CLI entry point
 ```
 
 ### 6. Secrets Management
@@ -314,91 +278,13 @@ If an agent is compromised or goes rogue:
 
 ## Resource Limits
 
-**Per-VM defaults** (configurable in `config/resources.yaml`):
-
-```yaml
-defaults:
-  cpus: 4
-  memory: 8GiB
-  disk: 50GiB
-
-# Override per-repo if needed
-overrides:
-  large-org/monorepo:
-    cpus: 8
-    memory: 16GiB
-    disk: 100GiB
-```
+**Per-VM defaults** (hardcoded in `lima/agent-sandbox.yaml`):
+- CPUs: 4
+- Memory: 8GiB
+- Disk: 50GiB
 
 **System-wide:**
-- Max concurrent VMs: 10 (soft limit, configurable)
 - No GPU passthrough (prevents crypto mining)
-
-## Open Questions
-
-### 1. Anthropic Authentication
-
-**Problem:** User wants to use Claude Pro subscription, not API key.
-
-**Options:**
-| Option | Pros | Cons |
-|--------|------|------|
-| API key | Simple, revocable, scoped | Costs money, not Pro |
-| Pre-auth in base image | Works offline | Creds may expire, image has secrets |
-| Mount ~/.claude from host | Fresh auth always | Breaks isolation |
-| Auth once per VM start | Secure | Requires browser, breaks unattended |
-| Persistent creds volume | Survives VM destroy | Shared across VMs |
-
-**Recommendation:** TBD - needs more investigation into Claude Pro OAuth flow and token lifetime.
-
-### 2. Homelab Integration
-
-**Current scope:** macOS (Lima works on Linux too)
-
-**Future questions:**
-- Same Lima setup on Linux homelab?
-- Central VM management across machines?
-- Shared config/secrets?
-
-### 3. Agent Task Specification
-
-**Current:** Manual - user starts agent, types instructions
-
-**Future consideration:**
-- Pass task description at VM creation?
-- Integration with issue trackers (Linear)?
-- Automated agent dispatch?
-
-### 4. Monitoring & Observability
-
-**Current:** SSH in and watch
-
-**Future consideration:**
-- Log aggregation from VMs?
-- Alerts on agent errors?
-- Usage/cost tracking?
-
-## Implementation Phases
-
-### Phase 1: MVP ✅
-- [x] Lima VM config with isolation (`lima/agent-sandbox.yaml`)
-- [x] Basic provisioning script (node, docker, git, claude) - embedded in yaml
-- [x] Simple sandbox-factory (create/list/destroy) (`scripts/sandbox-factory`)
-- [x] Manual secret injection (GITHUB_TOKEN env var)
-- [x] Basic network filtering (iptables ports only - 80, 443, 22)
-- [x] Config files (repos.txt, network-allowlist.txt, resources.yaml)
-
-### Phase 2: Polish
-- [ ] DNS-based domain filtering (use network-allowlist.txt)
-- [ ] Full dotfiles in VM
-- [ ] Config-driven resource limits (parse resources.yaml)
-- [x] Repo list in config file (config/repos.txt)
-
-### Phase 3: Advanced
-- [ ] 1Password integration for secrets
-- [ ] Homelab support
-- [x] Multiple concurrent VMs (supported via unique VM names)
-- [ ] Monitoring/logging
 
 ## Getting Started
 
