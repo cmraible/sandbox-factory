@@ -91,14 +91,6 @@ create_vm() {
     log_info "Creating VM: $vm_name for repo: $repo"
 
     # Check for GitHub token (optional - needed for private repos and pushing)
-    if [ -z "$GITHUB_TOKEN" ]; then
-        # Try to get from 1Password if available
-        if command -v op &> /dev/null; then
-            log_info "Attempting to get GitHub token from 1Password..."
-            GITHUB_TOKEN=$(op read "op://Private/GitHub PAT Agent/token" 2>/dev/null) || true
-        fi
-    fi
-
     if [ -n "$GITHUB_TOKEN" ]; then
         has_token=true
     else

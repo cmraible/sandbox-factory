@@ -37,7 +37,7 @@ sandbox-factory --stop <vm-name>    # Stop VM (preserves state)
 sandbox-factory --destroy <vm-name> # Destroy VM (irreversible)
 ```
 
-**Required:** `GITHUB_TOKEN` env var (or 1Password), `limactl` and `fzf` installed.
+**Required:** `GITHUB_TOKEN` env var, `limactl` and `fzf` installed.
 
 ## Development Notes
 

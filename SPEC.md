@@ -209,14 +209,12 @@ sandbox/
 - Anthropic credentials (TBD - see open questions)
 
 **Injection method:**
-- Secrets stored in 1Password
-- Injected at VM start via `op run` or `op read`
 - Passed as environment variables to VM
 - Never baked into base image
 
 ```bash
 # Example: inject secrets at VM start
-export GITHUB_TOKEN=$(op read "op://Private/GitHub PAT Agent/token")
+export GITHUB_TOKEN=your_token
 limactl start --name=agent-foo ./lima/agent-sandbox.yaml
 limactl shell agent-foo -- bash -c "echo 'export GITHUB_TOKEN=${GITHUB_TOKEN}' >> ~/.zshenv"
 ```
@@ -271,7 +269,7 @@ $ sandbox-factory --destroy anthropics/claude-code
 │ TRUSTED: macOS Host                                     │
 │ - Your files, credentials, network access               │
 │ - Lima daemon                                           │
-│ - 1Password                                             │
+│                                                         │
 ├─────────────────────────────────────────────────────────┤
 │ UNTRUSTED: Agent VM                                     │
 │ - Can run arbitrary code                                │
@@ -386,7 +384,7 @@ overrides:
 - [x] Lima VM config with isolation (`lima/agent-sandbox.yaml`)
 - [x] Basic provisioning script (node, docker, git, claude) - embedded in yaml
 - [x] Simple sandbox-factory (create/list/destroy) (`scripts/sandbox-factory`)
-- [x] Manual secret injection (GITHUB_TOKEN, 1Password optional)
+- [x] Manual secret injection (GITHUB_TOKEN env var)
 - [x] Basic network filtering (iptables ports only - 80, 443, 22)
 - [x] Config files (repos.txt, network-allowlist.txt, resources.yaml)
 
@@ -397,7 +395,7 @@ overrides:
 - [x] Repo list in config file (config/repos.txt)
 
 ### Phase 3: Advanced
-- [ ] 1Password integration for secrets (partially done - optional in sandbox-factory)
+- [ ] 1Password integration for secrets
 - [ ] Homelab support
 - [x] Multiple concurrent VMs (supported via unique VM names)
 - [ ] Monitoring/logging
@@ -420,7 +418,7 @@ limactl --version
 # 1. Add repos to config
 echo "your-org/your-repo" >> config/repos.txt
 
-# 2. Set GitHub token (or configure 1Password)
+# 2. Set GitHub token
 export GITHUB_TOKEN=your_scoped_pat
 
 # 3. Run sandbox-factory
