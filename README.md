@@ -1,5 +1,7 @@
 # Sandbox Factory
 
+> **Note:** This project is a work in progress and not ready for use by others yet.
+
 Create secure, isolated VMs for running AI coding agents autonomously. VMs have no host filesystem access and restricted network (allowlisted domains only).
 
 ## Dependencies
