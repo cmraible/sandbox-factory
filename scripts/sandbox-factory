@@ -74,11 +74,11 @@ check_dependencies() {
     fi
 }
 
-# Helper to run commands in VM without host proxy settings
+# Helper to run commands in VM
 vm_run() {
     local vm_name="$1"
     shift
-    limactl shell "$vm_name" -- env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY bash -c "$*"
+    limactl shell "$vm_name" -- bash -c "$*"
 }
 
 # Create a new VM for a repo

@@ -1,9 +1,6 @@
 # Agent Sandbox VM Configuration
 # Usage: limactl start --name=agent-foo ./agent-sandbox.yaml
 
-# Don't inherit proxy settings from host (can break apt, git, etc.)
-propagateProxyEnv: false
-
 # Use Apple Virtualization framework for better performance on ARM Macs
 vmType: vz
 vmOpts:
@@ -48,9 +45,6 @@ provision:
     script: |
       #!/bin/bash
       set -eux
-
-      # Unset proxy vars that Lima may have inherited from host
-      unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
 
       export DEBIAN_FRONTEND=noninteractive
 
@@ -152,9 +146,6 @@ provision:
     script: |
       #!/bin/bash
       set -ex  # Note: no -u flag, nvm has unbound variables
-
-      # Unset proxy vars that Lima may have inherited from host
-      unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY
 
       # Create directories first
       mkdir -p ~/workspace
